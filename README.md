@@ -1,0 +1,12 @@
+# hw4-trees
+HW4: Decision Trees
+
+For this assignment, we will learn from four pre-defined data sets:
+
+1.	monks1.csv: A data set describing two classes of robots using all nominal attributes and a binary label.  This data set has a simple rule set for determining the label: if head_shape = body_shape OR jacket_color = red, then yes, else no. Each of the attributes in the monks1 data set are nominal.  Monks1 was one of the first machine learning challenge problems (http://www.mli.gmu.edu/papers/91-95/91-28.pdf).  This data set comes from the UCI Machine Learning Repository: http://archive.ics.uci.edu/ml/datasets/MONK%27s+Problems
+
+2.	penguins.csv: A data set describing observed measurements of different animals belonging to three species of penguins.  The four attributes are each continuous measurements, and the label is the species of penguin.  Special thanks and credit to Professor Allison Horst at the University of California Santa Barbara for making this data set public: see this Twitter post and thread with more information (https://twitter.com/allison_horst/status/1270046399418138625) and GitHub repository (https://github.com/allisonhorst/palmerpenguins).
+
+3.	occupancy.csv: A data set of measurements describing a room in a building for a Smart Home application.  The task in this data set is to predict whether or not the room is occupied by people.  Each of the five attributes are continuous measurements.  The label is 0 if the room is unoccupied, and a 1 if it is occupied by a person.  This data set comes the UCI Machine Learning Repository: https://archive.ics.uci.edu/ml/datasets/Occupancy+Detection+
+
+4.	opticalDigit.csv: A data set of optical character recognition of numeric digits from processed pixel data.  Each instance represents a different 32x32 pixel image of a handwritten numeric digit (from 0 through 9).  Unlike MNIST from Homework 1, each image was preprocessed into a smaller number of attributes.  Each image was partitioned into 64 4x4 pixel segments and the number of pixels with non-background color were counted in each segment.  These 64 counts (ranging from 0-16) are the 64 attributes in the data set, and the label is the number from 0-9 that is represented by the image.  This data set is more complex than the Monks1 data set, but still contains only nominal attributes and a nominal label.  This data set comes from the UCI Machine Learning Repository: http://archive.ics.uci.edu/ml/datasets/Optical+Recognition+of+Handwritten+Digits
