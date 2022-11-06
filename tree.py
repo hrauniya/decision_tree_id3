@@ -42,10 +42,11 @@ class node:
         self.val = val
         self.children = []
 
-def gain(S, a):
+#calculate entropy of a dataframe
+def calculate_entropy(dataframe):
     entropy_count = {}
     total=0
-    for i in range(len(training_df)):
+    for i in range(0,len(dataframe)):
         row=training_df.iloc[i].to_numpy()
         if row[0] not in entropy_count:
             entropy_count[row[0]]=1
@@ -53,30 +54,56 @@ def gain(S, a):
             entropy_count[row[0]]+=1
         total+=1
     entropy = 0
-    for values in entropy_count.values:
+    for values in entropy_count.values():
         entropy = entropy + ((values/total) * math.log2(values/total))
     entropy = -1*entropy
-    
-def ID3(attributes, subset):
-    label_count = {}
-    for i in range(len(training_df)):
+    return entropy
+
+#calculating entropy given a certain attribute
+def calculate_attribute_entropy(dataframe, attribute):
+    entropy_count={}
+    total=0
+    index_attribute=columnnames.index(attribute)
+    for i in range(0,len(dataframe)):
         row=training_df.iloc[i].to_numpy()
-        if row[0] not in label_count:
-            label_count[row[0]]=1
-        else:
-            label_count[row[0]]+=1
-    max_label = max(label_count, key=label_count.get)
+        if row[index_attribute]==attribute:
+            if row[0] not in entropy_count:
+                entropy_count[row[0]]=1
+            else:
+                entropy_count[row[0]]+=1
+            total+=1
+    entropy = 0
+    for values in entropy_count.values():
+        entropy = entropy + ((values/total) * math.log2(values/total))
+    entropy = -1*entropy
+    return entropy
 
-    if len(attributes)==0:
-        N = max_label
-
-    elif len(label_count)==1:
-        N = max_label
 
 
-    return N
+# def gain(S, a):
+#     pass
+    
+# def ID3(attributes, subset):
+#     label_count = {}
+#     for i in range(len(training_df)):
+#         row=training_df.iloc[i].to_numpy()
+#         if row[0] not in label_count:
+#             label_count[row[0]]=1
+#         else:
+#             label_count[row[0]]+=1
+#     max_label = max(label_count, key=label_count.get)
+
+#     if len(attributes)==0:
+#         N = max_label
+
+#     elif len(label_count)==1:
+#         N = max_label
+
+
+#     return N
                 
-max = ID3([], training_df)
-print(max)
+# max = ID3([], training_df)
+# print(max)
 
 
+print(calculate_entropy(training_df))
