@@ -60,10 +60,9 @@ def calculate_entropy(dataframe):
     return entropy
 
 #calculating entropy given a certain attribute
-def calculate_attribute_entropy(dataframe, attribute):
+def calculate_attribute_entropy(dataframe, attribute, index_attribute):
     entropy_count={}
     total=0
-    index_attribute=columnnames.index(attribute)
     for i in range(0,len(dataframe)):
         row=training_df.iloc[i].to_numpy()
         if row[index_attribute]==attribute:
@@ -78,32 +77,54 @@ def calculate_attribute_entropy(dataframe, attribute):
     entropy = -1*entropy
     return entropy
 
+def gain(S, a):
+    gain_attribute = {}
+    print(columnnames)
+    attribute_index = columnnames.index(a)
+    length = len(S)
+    for i in range(0,len(S)):
+        row=training_df.iloc[i].to_numpy()
+        if row[attribute_index] not in gain_attribute:
+            gain_attribute[row[attribute_index]]=1
+        else:
+            gain_attribute[row[attribute_index]]+=1
+    print(gain_attribute)
+    second_exp = 0
+    for attribute_value in gain_attribute.keys():
+        second_exp = second_exp + gain_attribute[attribute_value]/length *  calculate_attribute_entropy(S, attribute_value, attribute_index)
+    gain = calculate_entropy(S) - second_exp
+    return gain
+
+def best_attribute(attributes, S):
+    best_gain = 0
+    best_attribute = ""
+    for attribute in attributes:
+        attribute_gain = gain(S, attribute)
+        if attribute_gain > best_gain:
+            best_gain = attribute_gain
+            best_attribute = attribute
+    return best_attribute
+
+def ID3(attributes, subset):
+    label_count = {}
+    for i in range(len(training_df)):
+        row=training_df.iloc[i].to_numpy()
+        if row[0] not in label_count:
+            label_count[row[0]]=1
+        else:
+            label_count[row[0]]+=1
+    max_label = max(label_count, key=label_count.get)
+
+    if len(attributes)==0:
+        N = node(max_label)
+    elif len(label_count)==1:
+        N = node(max_label)
 
 
-# def gain(S, a):
-#     pass
-    
-# def ID3(attributes, subset):
-#     label_count = {}
-#     for i in range(len(training_df)):
-#         row=training_df.iloc[i].to_numpy()
-#         if row[0] not in label_count:
-#             label_count[row[0]]=1
-#         else:
-#             label_count[row[0]]+=1
-#     max_label = max(label_count, key=label_count.get)
-
-#     if len(attributes)==0:
-#         N = max_label
-
-#     elif len(label_count)==1:
-#         N = max_label
-
-
-#     return N
+    return N
                 
-# max = ID3([], training_df)
-# print(max)
+max = ID3([], training_df)
+print(max)
 
 
-print(calculate_entropy(training_df))
+print(best_attribute(attributes, training_df))
