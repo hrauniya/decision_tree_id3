@@ -48,7 +48,7 @@ def calculate_entropy(dataframe):
     entropy_count = {}
     total=0
     for i in range(0,len(dataframe)):
-        row=training_df.iloc[i].to_numpy()
+        row=dataframe.iloc[i].to_numpy()
         if row[0] not in entropy_count:
             entropy_count[row[0]]=1
         else:
@@ -65,7 +65,7 @@ def calculate_attribute_entropy(dataframe, attribute, index_attribute):
     entropy_count={}
     total=0
     for i in range(0,len(dataframe)):
-        row=training_df.iloc[i].to_numpy()
+        row=dataframe.iloc[i].to_numpy()
         if row[index_attribute]==attribute:
             if row[0] not in entropy_count:
                 entropy_count[row[0]]=1
@@ -79,18 +79,43 @@ def calculate_attribute_entropy(dataframe, attribute, index_attribute):
     return entropy
 
 def gain(S, a):
+    # print("this is gain")
+    # print(S)
+    # print('this is attribute')
+    # print(a)
     gain_attribute = {}
     attribute_index = columnnames.index(a)
     length = len(S)
     for i in range(0,len(S)):
-        row=training_df.iloc[i].to_numpy()
+        row=S.iloc[i].to_numpy()
         if row[attribute_index] not in gain_attribute:
             gain_attribute[row[attribute_index]]=1
         else:
             gain_attribute[row[attribute_index]]+=1
     second_exp = 0
     for attribute_value in gain_attribute.keys():
-        second_exp = second_exp + gain_attribute[attribute_value]/length *  calculate_attribute_entropy(S, attribute_value, attribute_index)
+        second_exp = second_exp + ((gain_attribute[attribute_value])/length) *  calculate_attribute_entropy(S, attribute_value, attribute_index)
+    gain = calculate_entropy(S) - second_exp
+    return gain
+
+def numeric_gain(S, a):
+    # print("this is gain")
+    # print(S)
+    # print('this is attribute')
+    # print(a)
+    gain_attribute = {}
+    attribute_index = columnnames.index(a)
+    length = len(S)
+    S.sort_values(by=[a])
+    for i in range(0,len(S)):
+        row=S.iloc[i].to_numpy()
+        if row[attribute_index] not in gain_attribute:
+            gain_attribute[row[attribute_index]]=1
+        else:
+            gain_attribute[row[attribute_index]]+=1
+    second_exp = 0
+    for attribute_value in gain_attribute.keys():
+        second_exp = second_exp + ((gain_attribute[attribute_value])/length) *  calculate_attribute_entropy(S, attribute_value, attribute_index)
     gain = calculate_entropy(S) - second_exp
     return gain
 
@@ -102,41 +127,84 @@ def best_attribute(attributes, S):
         attribute_gain = gain(S, attribute)
         best_dict[attribute] = attribute_gain
         best_attribute = max(best_dict, key=best_dict.get)
-    print(best_dict)
+    # print(best_dict)
+    return best_attribute
+
+def best_attribute_numeric(attributes, S):
+    best_dict = {}
+    best_gain = 0
+    best_attribute = ""
+    for attribute in attributes:
+        attribute_gain = gain(S, attribute)
+        best_dict[attribute] = attribute_gain
+        best_attribute = max(best_dict, key=best_dict.get)
+    # print(best_dict)
     return best_attribute
 
 def possible_values(attribute, subset, index):
     new_df = subset.loc[subset[index]==attribute]
+    print(attribute)
+    print(new_df)
     return new_df
 
 def ID3(attributes, subset):
-    label_count = {}
-    for i in range(len(training_df)):
-        row=training_df.iloc[i].to_numpy()
-        if row[0] not in label_count:
-            label_count[row[0]]=1
-        else:
-            label_count[row[0]]+=1
-    max_label = max(label_count, key=label_count.get)
-
-    if len(attributes)==0:
-        # print("length is 0")
-        N = node(max_label)
-    elif len(label_count)==1:
-        N = node(max_label)
-    else:
-        best = best_attribute(attributes, subset)
-        attribute_index = columnnames.index(best)
-        N = node(best)
-        unique = subset[best].unique()
-        for value in unique:
-            new_df = possible_values(value, subset, best)
-            if len(new_df)==0:
-                N.children[value] = node(max_label)
+    if is_numeric == False:
+        label_count = {}
+        for i in range(len(subset)):
+            row=subset.iloc[i].to_numpy()
+            if row[0] not in label_count:
+                label_count[row[0]]=1
             else:
-                if best in attributes:
-                    attributes.remove(best)
-                N.children[value]=ID3(attributes, new_df)
-    return N
+                label_count[row[0]]+=1
+        max_label = max(label_count, key=label_count.get)
+
+        if len(attributes)==0:
+            # print("length is 0")
+            N = node(max_label)
+        elif len(label_count)==1:
+            N = node(max_label)
+        else:
+            best = best_attribute(attributes, subset)
+            attribute_index = columnnames.index(best)
+            N = node(best)
+            unique = subset[best].unique()
+            attributes.remove(best)
+            for value in unique:
+                new_df = possible_values(value, subset, best)
+                if len(new_df)==0:
+                    N.children[value] = node(max_label)
+                else:
+                    N.children[value]=ID3(attributes, new_df)
+        return N
+        
+    if is_numeric == True:
+        label_count = {}
+        for i in range(len(subset)):
+            row=subset.iloc[i].to_numpy()
+            if row[0] not in label_count:
+                label_count[row[0]]=1
+            else:
+                label_count[row[0]]+=1
+        max_label = max(label_count, key=label_count.get)
+
+        if len(attributes)==0:
+            # print("length is 0")
+            N = node(max_label)
+        elif len(label_count)==1:
+            N = node(max_label)
+        else:
+            best = best_attribute(attributes, subset)
+            attribute_index = columnnames.index(best)
+            N = node(best)
+            unique = subset[best].unique()
+            attributes.remove(best)
+            for value in unique:
+                new_df = possible_values(value, subset, best)
+                if len(new_df)==0:
+                    N.children[value] = node(max_label)
+                else:
+                    N.children[value]=ID3(attributes, new_df)
+        return N
                 
 tree = ID3(attributes, training_df)
+print("this is sunny val", tree.children['Rain'].children['Strong'].val)
