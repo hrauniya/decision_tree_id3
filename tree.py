@@ -10,6 +10,7 @@ import math
 import numpy as np
 import pandas as pd
 import csv
+import pptree 
 
 pd.options.mode.chained_assignment = None 
 
@@ -40,7 +41,7 @@ attributes = columnnames[1:]
 class node:
     def __init__(self, val): 
         self.val = val
-        self.children = []
+        self.children = {}
 
 #calculate entropy of a dataframe
 def calculate_entropy(dataframe):
@@ -79,7 +80,6 @@ def calculate_attribute_entropy(dataframe, attribute, index_attribute):
 
 def gain(S, a):
     gain_attribute = {}
-    print(columnnames)
     attribute_index = columnnames.index(a)
     length = len(S)
     for i in range(0,len(S)):
@@ -88,7 +88,6 @@ def gain(S, a):
             gain_attribute[row[attribute_index]]=1
         else:
             gain_attribute[row[attribute_index]]+=1
-    print(gain_attribute)
     second_exp = 0
     for attribute_value in gain_attribute.keys():
         second_exp = second_exp + gain_attribute[attribute_value]/length *  calculate_attribute_entropy(S, attribute_value, attribute_index)
@@ -96,14 +95,19 @@ def gain(S, a):
     return gain
 
 def best_attribute(attributes, S):
+    best_dict = {}
     best_gain = 0
     best_attribute = ""
     for attribute in attributes:
         attribute_gain = gain(S, attribute)
-        if attribute_gain > best_gain:
-            best_gain = attribute_gain
-            best_attribute = attribute
+        best_dict[attribute] = attribute_gain
+        best_attribute = max(best_dict, key=best_dict.get)
+    print(best_dict)
     return best_attribute
+
+def possible_values(attribute, subset, index):
+    new_df = subset.loc[subset[index]==attribute]
+    return new_df
 
 def ID3(attributes, subset):
     label_count = {}
@@ -116,15 +120,23 @@ def ID3(attributes, subset):
     max_label = max(label_count, key=label_count.get)
 
     if len(attributes)==0:
+        # print("length is 0")
         N = node(max_label)
     elif len(label_count)==1:
         N = node(max_label)
-
-
+    else:
+        best = best_attribute(attributes, subset)
+        attribute_index = columnnames.index(best)
+        N = node(best)
+        unique = subset[best].unique()
+        for value in unique:
+            new_df = possible_values(value, subset, best)
+            if len(new_df)==0:
+                N.children[value] = node(max_label)
+            else:
+                if best in attributes:
+                    attributes.remove(best)
+                N.children[value]=ID3(attributes, new_df)
     return N
                 
-max = ID3([], training_df)
-print(max)
-
-
-print(best_attribute(attributes, training_df))
+tree = ID3(attributes, training_df)
