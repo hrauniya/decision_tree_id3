@@ -10,6 +10,7 @@ import math
 import numpy as np
 import pandas as pd
 import csv
+import copy
 
 
 pd.options.mode.chained_assignment = None 
@@ -37,6 +38,10 @@ test_df = dataframe.iloc[training_set_length:]
 
 columnnames = list(training_df.columns.values)
 attributes = columnnames[1:]
+
+attribute_uniquevalues={}
+for attribute in attributes:
+    attribute_uniquevalues[attribute]=training_df[attribute].unique()
 
 class node:
     def __init__(self, val): 
@@ -148,7 +153,7 @@ def possible_values(attribute, subset, index):
     return new_df
 
 def ID3(attributes, subset):
-    if is_numeric == False:
+   
         label_count = {}
         for i in range(len(subset)):
             row=subset.iloc[i].to_numpy()
@@ -157,7 +162,6 @@ def ID3(attributes, subset):
             else:
                 label_count[row[0]]+=1
         max_label = max(label_count, key=label_count.get)
-
         if len(attributes)==0:
             # print("length is 0")
             N = node(max_label)
@@ -167,43 +171,16 @@ def ID3(attributes, subset):
             best = best_attribute(attributes, subset)
             attribute_index = columnnames.index(best)
             N = node(best)
-            unique = subset[best].unique()
-            attributes.remove(best)
+            unique = attribute_uniquevalues[best]
+            pass_attribute=copy.deepcopy(attributes)
+            pass_attribute.remove(best)
             for value in unique:
+                
                 new_df = possible_values(value, subset, best)
                 if len(new_df)==0:
                     N.children[value] = node(max_label)
                 else:
-                    N.children[value]=ID3(attributes, new_df)
-        return N
-        
-    if is_numeric == True:
-        label_count = {}
-        for i in range(len(subset)):
-            row=subset.iloc[i].to_numpy()
-            if row[0] not in label_count:
-                label_count[row[0]]=1
-            else:
-                label_count[row[0]]+=1
-        max_label = max(label_count, key=label_count.get)
-
-        if len(attributes)==0:
-            # print("length is 0")
-            N = node(max_label)
-        elif len(label_count)==1:
-            N = node(max_label)
-        else:
-            best = best_attribute(attributes, subset)
-            attribute_index = columnnames.index(best)
-            N = node(best)
-            unique = subset[best].unique()
-            attributes.remove(best)
-            for value in unique:
-                new_df = possible_values(value, subset, best)
-                if len(new_df)==0:
-                    N.children[value] = node(max_label)
-                else:
-                    N.children[value]=ID3(attributes, new_df)
+                    N.children[value]=ID3(pass_attribute, new_df)
         return N
 
 def prediction(test_df,tree,columnnames):
@@ -222,10 +199,9 @@ def prediction(test_df,tree,columnnames):
     print("The accuracy is",accuracy)
 
 def predict_label(attribute_value,tree):
-   
     if len(tree.children)==0:
         return tree.val
-    else:
+    else: 
         return predict_label(attribute_value,tree.children[attribute_value[tree.val]])
         
 
@@ -238,6 +214,7 @@ def printTree(tree:node, level=0,child=""):
 
 tree = ID3(attributes, training_df)
 prediction(test_df,tree,columnnames)
+
 
 
 
