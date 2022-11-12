@@ -10,7 +10,7 @@ import math
 import numpy as np
 import pandas as pd
 import csv
-import pptree 
+
 
 pd.options.mode.chained_assignment = None 
 
@@ -143,8 +143,8 @@ def best_attribute_numeric(attributes, S):
 
 def possible_values(attribute, subset, index):
     new_df = subset.loc[subset[index]==attribute]
-    print(attribute)
-    print(new_df)
+    # print(attribute)
+    # print(new_df)
     return new_df
 
 def ID3(attributes, subset):
@@ -205,6 +205,39 @@ def ID3(attributes, subset):
                 else:
                     N.children[value]=ID3(attributes, new_df)
         return N
-                
+
+def prediction(test_df,tree,columnnames):
+    accuracy=0
+    numerator=0
+    length_testdf=len(test_df)
+    for i in range(0,length_testdf):
+        row=test_df.iloc[i].to_numpy()
+        attribute_value={}
+        for x in range(len(columnnames)):
+            attribute_value[columnnames[x]]=row[x]
+        predicted_label=predict_label(attribute_value,tree)
+        if predicted_label==attribute_value["label"]:
+            numerator+=1
+    accuracy=numerator/length_testdf
+    print("The accuracy is",accuracy)
+
+def predict_label(attribute_value,tree):
+   
+    if len(tree.children)==0:
+        return tree.val
+    else:
+        return predict_label(attribute_value,tree.children[attribute_value[tree.val]])
+        
+
+def printTree(tree:node, level=0,child=""):
+    
+    print("        " * level,child,tree.val)
+    for child in tree.children.keys():
+        printTree(tree.children[child], level + 1,child)
+
+
 tree = ID3(attributes, training_df)
-print("this is sunny val", tree.children['Rain'].children['Strong'].val)
+prediction(test_df,tree,columnnames)
+
+
+
