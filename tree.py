@@ -35,13 +35,12 @@ training_set_length=round(training_percentage*dataframe_length)
 
 training_df = dataframe.iloc[0:training_set_length]
 test_df = dataframe.iloc[training_set_length:]
-
 columnnames = list(training_df.columns.values)
 attributes = columnnames[1:]
 
 attribute_uniquevalues={}
 for attribute in attributes:
-    attribute_uniquevalues[attribute]=training_df[attribute].unique()
+    attribute_uniquevalues[attribute]= dataframe[attribute].unique().tolist()
 
 class node:
     def __init__(self, val): 
@@ -227,18 +226,19 @@ def ID3(attributes, subset):
             N.threshold = threshold_best
             # unique = attribute_uniquevalues[best]
             less_df, greater_df = new_df_numeric(best, subset, threshold_best)
+            pass_attribute=copy.deepcopy(attributes)
+            # pass_attribute.remove(best)
             if len(less_df)==0:
                 N.children['less'] = node(max_label)
             else:
-                N.children['less']=ID3(attributes, less_df)
+                N.children['less']=ID3(pass_attribute, less_df)
             if len(greater_df)==0:
                 N.children['greater'] = node(max_label)
             else:
-                N.children['greater']=ID3(attributes, greater_df)
+                N.children['greater']=ID3(pass_attribute, greater_df)
         return N
 
     if is_numeric=="False":
-        print('This is false')
         label_count = {}
         for i in range(len(subset)):
             row=subset.iloc[i].to_numpy()
@@ -278,7 +278,7 @@ def prediction(test_df,tree,columnnames):
         for x in range(len(columnnames)):
             attribute_value[columnnames[x]]=row[x]
         predicted_label=predict_label(attribute_value,tree)
-        if predicted_label==attribute_value["label"]:
+        if predicted_label==attribute_value[columnnames[0]]:
             numerator+=1
     accuracy=numerator/length_testdf
     print("The accuracy is",accuracy)
@@ -306,7 +306,7 @@ def numeric_prediction(test_df,tree,columnnames):
     print("The accuracy is",accuracy)
 
 def numeric_predict_label(attribute_value,tree):
-    if len(tree.children)==0:
+    if tree.threshold is None:
         return tree.val
     else: 
         if attribute_value[tree.val] <= tree.threshold:
@@ -322,12 +322,13 @@ def printTree(tree:node, level=0,child=""):
 
 
 tree = ID3(attributes, training_df)
+# print(attribute_uniquevalues)
 printTree(tree)
 # print(tree)
 # print(tree.val)
 # print(tree.threshold)
 # print(tree.children)
-numeric_prediction(test_df,tree,columnnames)
+# prediction(test_df,tree,columnnames)
 # prediction(test_df,tree,columnnames)
 
 # thresholds = threshold(training_df, "bill_length_mm")
