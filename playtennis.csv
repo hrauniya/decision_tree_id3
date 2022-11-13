@@ -1,0 +1,7 @@
+play,outlook,temp,humidity,wind
+No,Sunny,90,High,Strong
+No,Rain,40,Normal,Strong
+No,Overcast,48,Normal,Strong
+Yes,Sunny,60,Normal,Strong
+Yes,Overcast,72,High,Strong
+Yes,Rain,80,High,Strong

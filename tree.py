@@ -111,13 +111,19 @@ def gain(S, a):
 
 def threshold(S, a):
     S = S.sort_values(a)
-    # print(S)
+    # species=S["species"].tolist()
+    # bill_length=S["bill_length_mm"].tolist()
+    # result=[]
+    # for i in range(len(species)):
+    #     result.append((species[i],bill_length[i]))
+    # print("This is result",result)
+
     label_index = 0
     attribute_index = columnnames.index(a)
     thresholds = []
-    previous = row=S.iloc[0].to_numpy()
+    previous=S.iloc[0].to_numpy()
     # for i in range(1,len(S)):
-    for row in S.values:
+    for row in S.values[1:]:
         # row=S.iloc[i].to_numpy()
         if previous[label_index] != row[label_index]:
             # print("previous is: ", previous[label_index], previous[attribute_index])
@@ -125,19 +131,18 @@ def threshold(S, a):
             new_threshold = (previous[attribute_index]+row[attribute_index])/2
             if new_threshold not in thresholds:
                 thresholds.append(new_threshold)
-            previous = row
+        previous = row
     return thresholds
 
 def best_threshold(S, a, thresholds):
     best_gain = 0 
     best_thresh = 0
-    print(thresholds)
     for threshold in thresholds:
         gain = numeric_gain(S, a, threshold)
         if gain > best_gain:
             best_gain = gain
             best_thresh = threshold
-    return best_thresh
+    return best_thresh,best_gain
 
 def numeric_entropy(S, a, threshold):
     attribute_index = columnnames.index(a)
@@ -174,7 +179,9 @@ def numeric_entropy(S, a, threshold):
 def numeric_gain(S, a, threshold):
     entropy_less, entropy_greater, less_total, greater_total = numeric_entropy(S, a, threshold)
     length = len(S)
-    gain = 1 - ((less_total/length) * entropy_less) + ((greater_total/length) * entropy_greater) 
+    second_exp=((less_total/length) * entropy_less) + ((greater_total/length) * entropy_greater)
+    gain = calculate_entropy(S) - second_exp
+    # print("This is whole entropy",calculate_entropy(S))
     return gain
 
 def best_attribute(attributes, S):
@@ -190,14 +197,25 @@ def best_attribute(attributes, S):
 
 def best_attribute_numeric(attributes, S):
     best_dict = {}
-    best_gain = 0
+    attribute_threshold={}
+    result_threshold=0
     best_attribute = ""
     for attribute in attributes:
-        attribute_gain = gain(S, attribute)
-        best_dict[attribute] = attribute_gain
-        best_attribute = max(best_dict, key=best_dict.get)
-    # print(best_dict)
-    return best_attribute
+        
+        list_thresholds = threshold(S, attribute)
+        # print(list_thresholds)
+        threshold_best,best_gain = best_threshold(S, attribute, list_thresholds)
+        # print(threshold_best, best_gain)
+        best_dict[attribute]=best_gain
+        attribute_threshold[attribute]=threshold_best
+    
+    best_attribute=max(best_dict,key=best_dict.get)
+    # print("This is best dict",best_dict)
+    # print("This is attribute_threshold",attribute_threshold)
+    # print(best_attribute)
+    # print(attribute_threshold[best_attribute])
+       
+    return best_attribute,attribute_threshold[best_attribute]
 
 def possible_values(attribute, subset, index):
     new_df = subset.loc[subset[index]==attribute]
@@ -226,26 +244,19 @@ def ID3(attributes, subset):
             else:
                 label_count[row[0]]+=1
         max_label = max(label_count, key=label_count.get)
-        print("here")
+        # print("here")
         if len(attributes)==0:
             # print("length is 0")
             N = node(max_label)
         elif len(label_count)==1:
             N = node(max_label)
         else:
-            best = best_attribute(attributes, subset)
-            print("here1")
-            list_thresholds = threshold(subset, best)
-            print("here2")
-            threshold_best = best_threshold(subset, best, list_thresholds)
-            print("here3")
+            best,threshold_best = best_attribute_numeric(attributes, subset)
             attribute_index = columnnames.index(best)
             N = node(best)
             N.threshold = threshold_best
-            # unique = attribute_uniquevalues[best]
             less_df, greater_df = new_df_numeric(best, subset, threshold_best)
             pass_attribute=copy.deepcopy(attributes)
-            # pass_attribute.remove(best)
             if len(less_df)==0:
                 N.children['less'] = node(max_label)
             else:
@@ -346,20 +357,10 @@ def printTree(tree:node, level=0,child=""):
 
 
 tree = ID3(attributes, training_df)
-# print(attribute_uniquevalues)
-# printTree(tree)
-# print(tree)
-# print(tree.val)
-# print(tree.threshold)
-# print(tree.children)
 numeric_prediction(test_df,tree,columnnames)
 end=time.time()
 print(end-start)
-# prediction(test_df,tree,columnnames)
 
-
-# thresholds = threshold(training_df, "bill_length_mm")
-# print(thresholds)
 
 
 
