@@ -11,8 +11,9 @@ import numpy as np
 import pandas as pd
 import csv
 import copy
+import time
 
-
+start=time.time()
 pd.options.mode.chained_assignment = None 
 
 #handling command line arguments to be entered in the terminal
@@ -42,6 +43,8 @@ attribute_uniquevalues={}
 for attribute in attributes:
     attribute_uniquevalues[attribute]= dataframe[attribute].unique().tolist()
 
+# print(columnnames[0])
+
 class node:
     def __init__(self, val): 
         self.val = val
@@ -52,8 +55,9 @@ class node:
 def calculate_entropy(dataframe):
     entropy_count = {}
     total=0
-    for i in range(0,len(dataframe)):
-        row=dataframe.iloc[i].to_numpy()
+    # for idx,row in dataframe.iterrows():
+    for row in dataframe.values:
+        # row=dataframe.iloc[i].to_numpy()
         if row[0] not in entropy_count:
             entropy_count[row[0]]=1
         else:
@@ -69,8 +73,9 @@ def calculate_entropy(dataframe):
 def calculate_attribute_entropy(dataframe, attribute, index_attribute):
     entropy_count={}
     total=0
-    for i in range(0,len(dataframe)):
-        row=dataframe.iloc[i].to_numpy()
+    # for idx,row in dataframe.iterrows():
+    for row in dataframe.values:
+        # row=dataframe.iloc[i].to_numpy()
         if row[index_attribute]==attribute:
             if row[0] not in entropy_count:
                 entropy_count[row[0]]=1
@@ -91,8 +96,9 @@ def gain(S, a):
     gain_attribute = {}
     attribute_index = columnnames.index(a)
     length = len(S)
-    for i in range(0,len(S)):
-        row=S.iloc[i].to_numpy()
+    # for idx, row in S.iterrows():
+    for row in S.values:
+        # row=S.iloc[i].to_numpy()
         if row[attribute_index] not in gain_attribute:
             gain_attribute[row[attribute_index]]=1
         else:
@@ -200,12 +206,15 @@ def new_df_numeric(attribute, subset, threshold):
     greater_df = subset[subset[attribute] > threshold]
     return less_df, greater_df
 
+
+
 def ID3(attributes, subset):
 
     if is_numeric=="True":
         print("this is true")
         label_count = {}
-        for i in range(len(subset)):
+        # for i in range(len(subset)):
+        for index,row in subset.iterrows():
             row=subset.iloc[i].to_numpy()
             if row[0] not in label_count:
                 label_count[row[0]]=1
@@ -240,12 +249,15 @@ def ID3(attributes, subset):
 
     if is_numeric=="False":
         label_count = {}
-        for i in range(len(subset)):
-            row=subset.iloc[i].to_numpy()
+        # for i in range(len(subset)):
+        # for index,row in subset.iterrows():
+        for row in subset.values:
+            # row=subset.iloc[i].to_numpy()
             if row[0] not in label_count:
                 label_count[row[0]]=1
             else:
                 label_count[row[0]]+=1
+        
         max_label = max(label_count, key=label_count.get)
         if len(attributes)==0:
             # print("length is 0")
@@ -272,8 +284,10 @@ def prediction(test_df,tree,columnnames):
     accuracy=0
     numerator=0
     length_testdf=len(test_df)
-    for i in range(0,length_testdf):
-        row=test_df.iloc[i].to_numpy()
+    # for i in range(0,length_testdf):
+    # for idx,row in test_df.iterrows():
+    for row in test_df.values:
+        # row=test_df.iloc[i].to_numpy()
         attribute_value={}
         for x in range(len(columnnames)):
             attribute_value[columnnames[x]]=row[x]
@@ -323,13 +337,16 @@ def printTree(tree:node, level=0,child=""):
 
 tree = ID3(attributes, training_df)
 # print(attribute_uniquevalues)
-printTree(tree)
+# printTree(tree)
 # print(tree)
 # print(tree.val)
 # print(tree.threshold)
 # print(tree.children)
+prediction(test_df,tree,columnnames)
+end=time.time()
+print(end-start)
 # prediction(test_df,tree,columnnames)
-# prediction(test_df,tree,columnnames)
+
 
 # thresholds = threshold(training_df, "bill_length_mm")
 # print(thresholds)
