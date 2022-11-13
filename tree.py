@@ -226,17 +226,15 @@ def ID3(attributes, subset):
             N = node(best)
             N.threshold = threshold_best
             # unique = attribute_uniquevalues[best]
-            pass_attribute=copy.deepcopy(attributes)
-            pass_attribute.remove(best)
-            less_df, greater_df = new_df_numeric(best, subset, threshold)
+            less_df, greater_df = new_df_numeric(best, subset, threshold_best)
             if len(less_df)==0:
                 N.children['less'] = node(max_label)
             else:
-                N.children['less']=ID3(pass_attribute, less_df)
+                N.children['less']=ID3(attributes, less_df)
             if len(greater_df)==0:
                 N.children['greater'] = node(max_label)
             else:
-                N.children['greater']=ID3(pass_attribute, greater_df)
+                N.children['greater']=ID3(attributes, greater_df)
         return N
 
     if is_numeric=="False":
@@ -290,7 +288,31 @@ def predict_label(attribute_value,tree):
         return tree.val
     else: 
         return predict_label(attribute_value,tree.children[attribute_value[tree.val]])
-        
+
+def numeric_prediction(test_df,tree,columnnames):
+    accuracy=0
+    numerator=0
+    length_testdf=len(test_df)
+    for i in range(0,length_testdf):
+        row=test_df.iloc[i].to_numpy()
+        attribute_value={}
+        for x in range(len(columnnames)):
+            attribute_value[columnnames[x]]=row[x]
+        predicted_label=numeric_predict_label(attribute_value,tree)
+        # print("this is attribute value: ", attribute_value)
+        if predicted_label==row[0]:
+            numerator+=1
+    accuracy=numerator/length_testdf
+    print("The accuracy is",accuracy)
+
+def numeric_predict_label(attribute_value,tree):
+    if len(tree.children)==0:
+        return tree.val
+    else: 
+        if attribute_value[tree.val] <= tree.threshold:
+            return numeric_predict_label(attribute_value,tree.children['less'])
+        else:
+            return numeric_predict_label(attribute_value,tree.children['greater'])
 
 def printTree(tree:node, level=0,child=""):
     
@@ -299,11 +321,17 @@ def printTree(tree:node, level=0,child=""):
         printTree(tree.children[child], level + 1,child)
 
 
-# tree = ID3(attributes, training_df)
+tree = ID3(attributes, training_df)
+printTree(tree)
+# print(tree)
+# print(tree.val)
+# print(tree.threshold)
+# print(tree.children)
+numeric_prediction(test_df,tree,columnnames)
 # prediction(test_df,tree,columnnames)
 
-thresholds = threshold(training_df, "bill_length_mm")
-print(thresholds)
+# thresholds = threshold(training_df, "bill_length_mm")
+# print(thresholds)
 
 
 
