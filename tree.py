@@ -116,8 +116,9 @@ def threshold(S, a):
     attribute_index = columnnames.index(a)
     thresholds = []
     previous = row=S.iloc[0].to_numpy()
-    for i in range(1,len(S)):
-        row=S.iloc[i].to_numpy()
+    # for i in range(1,len(S)):
+    for row in S.values:
+        # row=S.iloc[i].to_numpy()
         if previous[label_index] != row[label_index]:
             # print("previous is: ", previous[label_index], previous[attribute_index])
             # print("row is: ", row[label_index], row[attribute_index])
@@ -145,8 +146,9 @@ def numeric_entropy(S, a, threshold):
     label_index = 0
     less_total = 0
     greater_total = 0
-    for i in range(0,len(S)):
-        row=S.iloc[i].to_numpy()
+    # for i in range(0,len(S)):
+    for row in S.values:
+        # row=S.iloc[i].to_numpy()
         if row[attribute_index] <= threshold:
             if row[label_index] not in less:
                 less[row[label_index]]=1
@@ -213,10 +215,12 @@ def new_df_numeric(attribute, subset, threshold):
 def ID3(attributes, subset):
 
     if is_numeric=="True":
-        print("this is true")
+        # print("this is true")
         label_count = {}
         # for i in range(len(subset)):
-        for index,row in subset.iterrows():
+        # for index,row in subset.iterrows():
+        for row in subset.values:
+            # row=subset.iloc[i].to_numpy()
             if row[0] not in label_count:
                 label_count[row[0]]=1
             else:
@@ -312,8 +316,9 @@ def numeric_prediction(test_df,tree,columnnames):
     accuracy=0
     numerator=0
     length_testdf=len(test_df)
-    for i in range(0,length_testdf):
-        row=test_df.iloc[i].to_numpy()
+    # for i in range(0,length_testdf):
+    for row in test_df.values:
+        # row=test_df.iloc[i].to_numpy()
         attribute_value={}
         for x in range(len(columnnames)):
             attribute_value[columnnames[x]]=row[x]
