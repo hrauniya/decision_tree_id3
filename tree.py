@@ -122,13 +122,15 @@ def threshold(S, a):
             # print("previous is: ", previous[label_index], previous[attribute_index])
             # print("row is: ", row[label_index], row[attribute_index])
             new_threshold = (previous[attribute_index]+row[attribute_index])/2
-            thresholds.append(new_threshold)
+            if new_threshold not in thresholds:
+                thresholds.append(new_threshold)
             previous = row
     return thresholds
 
 def best_threshold(S, a, thresholds):
     best_gain = 0 
     best_thresh = 0
+    print(thresholds)
     for threshold in thresholds:
         gain = numeric_gain(S, a, threshold)
         if gain > best_gain:
@@ -215,12 +217,12 @@ def ID3(attributes, subset):
         label_count = {}
         # for i in range(len(subset)):
         for index,row in subset.iterrows():
-            row=subset.iloc[i].to_numpy()
             if row[0] not in label_count:
                 label_count[row[0]]=1
             else:
                 label_count[row[0]]+=1
         max_label = max(label_count, key=label_count.get)
+        print("here")
         if len(attributes)==0:
             # print("length is 0")
             N = node(max_label)
@@ -228,8 +230,11 @@ def ID3(attributes, subset):
             N = node(max_label)
         else:
             best = best_attribute(attributes, subset)
+            print("here1")
             list_thresholds = threshold(subset, best)
+            print("here2")
             threshold_best = best_threshold(subset, best, list_thresholds)
+            print("here3")
             attribute_index = columnnames.index(best)
             N = node(best)
             N.threshold = threshold_best
@@ -342,7 +347,7 @@ tree = ID3(attributes, training_df)
 # print(tree.val)
 # print(tree.threshold)
 # print(tree.children)
-prediction(test_df,tree,columnnames)
+numeric_prediction(test_df,tree,columnnames)
 end=time.time()
 print(end-start)
 # prediction(test_df,tree,columnnames)
