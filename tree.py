@@ -1,6 +1,6 @@
 """
 @author:Harsha Rauniyar and Austin Alcancia
-implementing the id3 algorithm
+implementing the id3 algorithm 
 """
 
 from enum import unique
@@ -26,7 +26,6 @@ random.seed(random_seed)
 
 #initialize dataframe
 dataframe=pd.read_csv(sys.argv[1])
-
 dataframe=dataframe.sample(random_state=random_seed, frac=1)
 
 
@@ -39,12 +38,12 @@ test_df = dataframe.iloc[training_set_length:]
 columnnames = list(training_df.columns.values)
 attributes = columnnames[1:]
 
+#dictionary maps attribute to its unique values
 attribute_uniquevalues={}
 for attribute in attributes:
     attribute_uniquevalues[attribute]= dataframe[attribute].unique().tolist()
 
-# print(columnnames[0])
-
+#node class for building decision tree
 class node:
     def __init__(self, val): 
         self.val = val
@@ -55,9 +54,7 @@ class node:
 def calculate_entropy(dataframe):
     entropy_count = {}
     total=0
-    # for idx,row in dataframe.iterrows():
     for row in dataframe.values:
-        # row=dataframe.iloc[i].to_numpy()
         if row[0] not in entropy_count:
             entropy_count[row[0]]=1
         else:
@@ -69,13 +66,11 @@ def calculate_entropy(dataframe):
     entropy = -1*entropy
     return entropy
 
-#calculating entropy given a certain attribute
+#calculating entropy given a certain attribute in a dataframe
 def calculate_attribute_entropy(dataframe, attribute, index_attribute):
     entropy_count={}
     total=0
-    # for idx,row in dataframe.iterrows():
     for row in dataframe.values:
-        # row=dataframe.iloc[i].to_numpy()
         if row[index_attribute]==attribute:
             if row[0] not in entropy_count:
                 entropy_count[row[0]]=1
@@ -88,17 +83,12 @@ def calculate_attribute_entropy(dataframe, attribute, index_attribute):
     entropy = -1*entropy
     return entropy
 
+#calculating the gain of attribute in dataframe S
 def gain(S, a):
-    # print("this is gain")
-    # print(S)
-    # print('this is attribute')
-    # print(a)
     gain_attribute = {}
     attribute_index = columnnames.index(a)
     length = len(S)
-    # for idx, row in S.iterrows():
     for row in S.values:
-        # row=S.iloc[i].to_numpy()
         if row[attribute_index] not in gain_attribute:
             gain_attribute[row[attribute_index]]=1
         else:
@@ -109,31 +99,22 @@ def gain(S, a):
     gain = calculate_entropy(S) - second_exp
     return gain
 
+#finding the thresholds of an attribute in the subset S
 def threshold(S, a):
     S = S.sort_values(a)
-    # species=S["species"].tolist()
-    # bill_length=S["bill_length_mm"].tolist()
-    # result=[]
-    # for i in range(len(species)):
-    #     result.append((species[i],bill_length[i]))
-    # print("This is result",result)
-
     label_index = 0
     attribute_index = columnnames.index(a)
     thresholds = []
     previous=S.iloc[0].to_numpy()
-    # for i in range(1,len(S)):
     for row in S.values[1:]:
-        # row=S.iloc[i].to_numpy()
         if previous[label_index] != row[label_index]:
-            # print("previous is: ", previous[label_index], previous[attribute_index])
-            # print("row is: ", row[label_index], row[attribute_index])
             new_threshold = (previous[attribute_index]+row[attribute_index])/2
             if new_threshold not in thresholds:
                 thresholds.append(new_threshold)
         previous = row
     return thresholds
 
+#finding the best_threshold of an attribute
 def best_threshold(S, a, thresholds):
     best_gain = 0 
     best_thresh = 0
@@ -144,6 +125,7 @@ def best_threshold(S, a, thresholds):
             best_thresh = threshold
     return best_thresh,best_gain
 
+#finding the numeric entropy of the subsets divided by the threshold
 def numeric_entropy(S, a, threshold):
     attribute_index = columnnames.index(a)
     less = {}
@@ -151,9 +133,7 @@ def numeric_entropy(S, a, threshold):
     label_index = 0
     less_total = 0
     greater_total = 0
-    # for i in range(0,len(S)):
     for row in S.values:
-        # row=S.iloc[i].to_numpy()
         if row[attribute_index] <= threshold:
             if row[label_index] not in less:
                 less[row[label_index]]=1
@@ -176,14 +156,15 @@ def numeric_entropy(S, a, threshold):
     entropy_greater = -1*entropy_greater
     return entropy_less, entropy_greater, less_total, greater_total
 
+#calculating the gain of the attribute given a threshold and a subset S
 def numeric_gain(S, a, threshold):
     entropy_less, entropy_greater, less_total, greater_total = numeric_entropy(S, a, threshold)
     length = len(S)
     second_exp=((less_total/length) * entropy_less) + ((greater_total/length) * entropy_greater)
     gain = calculate_entropy(S) - second_exp
-    # print("This is whole entropy",calculate_entropy(S))
     return gain
 
+#find the best attribite for categorical attributes
 def best_attribute(attributes, S):
     best_dict = {}
     best_gain = 0
@@ -192,9 +173,9 @@ def best_attribute(attributes, S):
         attribute_gain = gain(S, attribute)
         best_dict[attribute] = attribute_gain
         best_attribute = max(best_dict, key=best_dict.get)
-    # print(best_dict)
     return best_attribute
 
+#finding the best attribute for continuos attributes
 def best_attribute_numeric(attributes, S):
     best_dict = {}
     attribute_threshold={}
@@ -203,50 +184,36 @@ def best_attribute_numeric(attributes, S):
     for attribute in attributes:
         
         list_thresholds = threshold(S, attribute)
-        # print(list_thresholds)
         threshold_best,best_gain = best_threshold(S, attribute, list_thresholds)
-        # print(threshold_best, best_gain)
         best_dict[attribute]=best_gain
         attribute_threshold[attribute]=threshold_best
     
     best_attribute=max(best_dict,key=best_dict.get)
-    # print("This is best dict",best_dict)
-    # print("This is attribute_threshold",attribute_threshold)
-    # print(best_attribute)
-    # print(attribute_threshold[best_attribute])
        
     return best_attribute,attribute_threshold[best_attribute]
 
 def possible_values(attribute, subset, index):
     new_df = subset.loc[subset[index]==attribute]
-    # print(attribute)
-    # print(new_df)
     return new_df
 
+#function create two dataframes according to threshold
 def new_df_numeric(attribute, subset, threshold):
     less_df = subset[subset[attribute] <= threshold]
     greater_df = subset[subset[attribute] > threshold]
     return less_df, greater_df
 
-
-
+#the id3 algorithm which also handles continuous values
 def ID3(attributes, subset):
 
     if is_numeric=="True":
-        # print("this is true")
         label_count = {}
-        # for i in range(len(subset)):
-        # for index,row in subset.iterrows():
         for row in subset.values:
-            # row=subset.iloc[i].to_numpy()
             if row[0] not in label_count:
                 label_count[row[0]]=1
             else:
                 label_count[row[0]]+=1
         max_label = max(label_count, key=label_count.get)
-        # print("here")
         if len(attributes)==0:
-            # print("length is 0")
             N = node(max_label)
         elif len(label_count)==1:
             N = node(max_label)
@@ -269,10 +236,7 @@ def ID3(attributes, subset):
 
     if is_numeric=="False":
         label_count = {}
-        # for i in range(len(subset)):
-        # for index,row in subset.iterrows():
         for row in subset.values:
-            # row=subset.iloc[i].to_numpy()
             if row[0] not in label_count:
                 label_count[row[0]]=1
             else:
@@ -280,7 +244,6 @@ def ID3(attributes, subset):
         
         max_label = max(label_count, key=label_count.get)
         if len(attributes)==0:
-            # print("length is 0")
             N = node(max_label)
         elif len(label_count)==1:
             N = node(max_label)
@@ -300,14 +263,12 @@ def ID3(attributes, subset):
                     N.children[value]=ID3(pass_attribute, new_df)
         return N
 
+#function to predict labels and calculate accuracy for test set for is_numeric=false
 def prediction(test_df,tree,columnnames,place_dict,twolist):
     accuracy=0
     numerator=0
     length_testdf=len(test_df)
-    # for i in range(0,length_testdf):
-    # for idx,row in test_df.iterrows():
     for row in test_df.values:
-        # row=test_df.iloc[i].to_numpy()
         attribute_value={}
         for x in range(len(columnnames)):
             attribute_value[columnnames[x]]=row[x]
@@ -320,24 +281,23 @@ def prediction(test_df,tree,columnnames,place_dict,twolist):
     accuracy=numerator/length_testdf
     print("The accuracy is",accuracy)
 
+##function to traverse the tree predicting label for is_numeric=false
 def predict_label(attribute_value,tree):
     if len(tree.children)==0:
         return tree.val
     else: 
         return predict_label(attribute_value,tree.children[attribute_value[tree.val]])
 
+#function to predict labels and calculate accuracy for test set for is_numeric=true
 def numeric_prediction(test_df,tree,columnnames, place_dict, twolist):
     accuracy=0
     numerator=0
     length_testdf=len(test_df)
-    # for i in range(0,length_testdf):
     for row in test_df.values:
-        # row=test_df.iloc[i].to_numpy()
         attribute_value={}
         for x in range(len(columnnames)):
             attribute_value[columnnames[x]]=row[x]
         predicted_label=numeric_predict_label(attribute_value,tree)
-        # print("this is attribute value: ", attribute_value)
         if predicted_label==row[0]:
             numerator+=1
         column = place_dict[predicted_label]
@@ -346,6 +306,7 @@ def numeric_prediction(test_df,tree,columnnames, place_dict, twolist):
     accuracy=numerator/length_testdf
     print("The accuracy is",accuracy)
 
+#function to traverse the tree predicting label for is_numeric=true
 def numeric_predict_label(attribute_value,tree):
     if tree.threshold is None:
         return tree.val
@@ -355,12 +316,14 @@ def numeric_predict_label(attribute_value,tree):
         else:
             return numeric_predict_label(attribute_value,tree.children['greater'])
 
+#function to print the tree
 def printTree(tree:node, level=0,child=""):
     
     print("        " * level,child,tree.val)
     for child in tree.children.keys():
         printTree(tree.children[child], level + 1,child)
-        
+
+#function to create variables for confusion matrix       
 def confusion_matrix():
     all_unique = dataframe[dataframe.columns[0]].unique()
     twolist = []
@@ -378,6 +341,7 @@ def confusion_matrix():
     return place_dict, twolist, all_unique
 
 
+#main function
 def main():
     place_dict, twolist, all_unique = confusion_matrix()
     if is_numeric == "True":
@@ -407,6 +371,7 @@ def main():
             row.append(all_unique[count])
             write.writerow(row)
             count+=1       
+
 
 main()
 
