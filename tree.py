@@ -354,7 +354,7 @@ def main():
     # create file name
     length = len(dataset)
     abrev = dataset[0:length-4]
-    name = "results-tree" + abrev + "-" + is_numeric + str(random_seed) + ".csv"
+    name = "results-tree" + abrev + "-" + is_numeric+ "-" + str(random_seed) + ".csv"
 
     final_labels = all_unique
     final_labels = final_labels.tolist()
