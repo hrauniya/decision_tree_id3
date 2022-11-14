@@ -300,7 +300,7 @@ def ID3(attributes, subset):
                     N.children[value]=ID3(pass_attribute, new_df)
         return N
 
-def prediction(test_df,tree,columnnames):
+def prediction(test_df,tree,columnnames,place_dict,twolist):
     accuracy=0
     numerator=0
     length_testdf=len(test_df)
@@ -314,6 +314,9 @@ def prediction(test_df,tree,columnnames):
         predicted_label=predict_label(attribute_value,tree)
         if predicted_label==attribute_value[columnnames[0]]:
             numerator+=1
+    column = place_dict[predicted_label]
+    row = place_dict[row[0]]
+    twolist[row][column]+=1
     accuracy=numerator/length_testdf
     print("The accuracy is",accuracy)
 
@@ -323,7 +326,7 @@ def predict_label(attribute_value,tree):
     else: 
         return predict_label(attribute_value,tree.children[attribute_value[tree.val]])
 
-def numeric_prediction(test_df,tree,columnnames):
+def numeric_prediction(test_df,tree,columnnames, place_dict, twolist):
     accuracy=0
     numerator=0
     length_testdf=len(test_df)
@@ -337,6 +340,9 @@ def numeric_prediction(test_df,tree,columnnames):
         # print("this is attribute value: ", attribute_value)
         if predicted_label==row[0]:
             numerator+=1
+        column = place_dict[predicted_label]
+        row = place_dict[row[0]]
+        twolist[row][column]+=1
     accuracy=numerator/length_testdf
     print("The accuracy is",accuracy)
 
@@ -354,13 +360,56 @@ def printTree(tree:node, level=0,child=""):
     print("        " * level,child,tree.val)
     for child in tree.children.keys():
         printTree(tree.children[child], level + 1,child)
+        
+def confusion_matrix():
+    all_unique = dataframe[dataframe.columns[0]].unique()
+    twolist = []
+    place_dict = {}
+
+    for x in range(len(all_unique)):
+        newlist=[]
+        for y in range(len(all_unique)):
+            newlist.append(0)
+        twolist.append(newlist)
+
+    for x in range(len(all_unique)):
+        place_dict[all_unique[x]] = x
+
+    return place_dict, twolist, all_unique
 
 
-tree = ID3(attributes, training_df)
-if is_numeric=="True":
-    numeric_prediction(test_df,tree,columnnames)
-else:
-    prediction(test_df,tree, columnnames)
+def main():
+    place_dict, twolist, all_unique = confusion_matrix()
+    if is_numeric == "True":
+        tree = ID3(attributes, training_df)
+        numeric_prediction(test_df,tree,columnnames,place_dict,twolist)
+    else: 
+        tree = ID3(attributes, training_df)
+        prediction(test_df,tree,columnnames,place_dict,twolist)
+
+    # create file name
+    length = len(dataset)
+    abrev = dataset[0:length-4]
+    name = "results-tree" + abrev + "-" + is_numeric + str(random_seed) + ".csv"
+
+    final_labels = all_unique
+    final_labels = final_labels.tolist()
+    final_labels.append("")
+
+    # create new csv file
+    with open(name, 'w', newline='') as newfile:
+    # initialize csv
+        write = csv.writer(newfile)
+        write.writerow(final_labels)
+        count=0
+        # write each row to csv
+        for row in twolist:
+            row.append(all_unique[count])
+            write.writerow(row)
+            count+=1       
+
+main()
+
 end=time.time()
 print(end-start)
 
