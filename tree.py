@@ -275,9 +275,9 @@ def prediction(test_df,tree,columnnames,place_dict,twolist):
         predicted_label=predict_label(attribute_value,tree)
         if predicted_label==attribute_value[columnnames[0]]:
             numerator+=1
-    column = place_dict[predicted_label]
-    row = place_dict[row[0]]
-    twolist[row][column]+=1
+        column = place_dict[predicted_label]
+        row = place_dict[row[0]]
+        twolist[row][column]+=1
     accuracy=numerator/length_testdf
     print("The accuracy is",accuracy)
 
