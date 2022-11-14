@@ -357,7 +357,10 @@ def printTree(tree:node, level=0,child=""):
 
 
 tree = ID3(attributes, training_df)
-numeric_prediction(test_df,tree,columnnames)
+if is_numeric=="True":
+    numeric_prediction(test_df,tree,columnnames)
+else:
+    prediction(test_df,tree, columnnames)
 end=time.time()
 print(end-start)
 
