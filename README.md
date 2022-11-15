@@ -1,13 +1,87 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-c66648af7eb3fe8bc4f294546bfd86ef473780cde1dea487d3c4ff354943c9ae.svg)](https://classroom.github.com/online_ide?assignment_repo_id=9216590&assignment_repo_type=AssignmentRepo)
-# hw4-trees
-HW4: Decision Trees
+Austin Alcancia and Harsha Rauniyar
 
-For this assignment, we will learn from four pre-defined data sets:
+Answer to research questions
 
-1.	monks1.csv: A data set describing two classes of robots using all nominal attributes and a binary label.  This data set has a simple rule set for determining the label: if head_shape = body_shape OR jacket_color = red, then yes, else no. Each of the attributes in the monks1 data set are nominal.  Monks1 was one of the first machine learning challenge problems (http://www.mli.gmu.edu/papers/91-95/91-28.pdf).  This data set comes from the UCI Machine Learning Repository: http://archive.ics.uci.edu/ml/datasets/MONK%27s+Problems
+1)
+With training set percentage of 0.75 and a seed of 3452456, our program achieved the following accuracies.
 
-2.	penguins.csv: A data set describing observed measurements of different animals belonging to three species of penguins.  The four attributes are each continuous measurements, and the label is the species of penguin.  Special thanks and credit to Professor Allison Horst at the University of California Santa Barbara for making this data set public: see this Twitter post and thread with more information (https://twitter.com/allison_horst/status/1270046399418138625) and GitHub repository (https://github.com/allisonhorst/palmerpenguins).
+a)
+monks1.csv = 0.9629
+penguins.csv = 0.9418 (is_numeric=True)
+occupancy.csv= 0.9905 (is_numeric=True)
+opticalDigit.csv=0.8911(is_numeric=True)
 
-3.	occupancy.csv: A data set of measurements describing a room in a building for a Smart Home application.  The task in this data set is to predict whether or not the room is occupied by people.  Each of the five attributes are continuous measurements.  The label is 0 if the room is unoccupied, and a 1 if it is occupied by a person.  This data set comes the UCI Machine Learning Repository: https://archive.ics.uci.edu/ml/datasets/Occupancy+Detection+
+b)The 95 percent confidence intervals for the accuracy on each set are as follows
 
-4.	opticalDigit.csv: A data set of optical character recognition of numeric digits from processed pixel data.  Each instance represents a different 32x32 pixel image of a handwritten numeric digit (from 0 through 9).  Unlike MNIST from Homework 1, each image was preprocessed into a smaller number of attributes.  Each image was partitioned into 64 4x4 pixel segments and the number of pixels with non-background color were counted in each segment.  These 64 counts (ranging from 0-16) are the 64 attributes in the data set, and the label is the number from 0-9 that is represented by the image.  This data set is more complex than the Monks1 data set, but still contains only nominal attributes and a nominal label.  This data set comes from the UCI Machine Learning Repository: http://archive.ics.uci.edu/ml/datasets/Optical+Recognition+of+Handwritten+Digits
+monks1.csv
+
+0.9629 +- (1.96 * sqrt(0.9629(1-0.9629)/108)
+CI=[0.9273, 0.9985]
+
+penguins.csv
+
+0.9418 +- (1.96 * sqrt(0.9418(1-0.9418)/86)
+CI=[0.8923, 0.9913]
+
+occupancy.csv
+
+0.9905 +- (1.96 * sqrt(0.9905(1-0.9905)/5140)
+CI=[0.98784, 0.993151]
+
+opticalDigit.csv
+
+0.8911 +- (1.96 * sqrt(0.8911(1-0.8911)/1405)
+CI=[0.8748, 0.9074]
+
+2)
+
+a) (Drawing PDF added to github)
+The rules learned by the tree are
+- If jacket_color is Red then YES
+- If jacket_color is Blue AND holding is flag AND body_shape=head_shape then YES else NO
+- If jacket_color is Blue AND holding is balloon AND has_tie is NO AND body_shape=head_shape then YES else NO
+- If jacket_color is Blue AND holding is balloon AND has_tie is YES AND body_shape=head_shape then YES else NO
+- If jacket_color is Blue AND holding is sword AND head_shape=body_shape then YES else NO
+- If jacket_color is Green AND head_shape=body_shape then YES else NO
+- If jacket_color is Yellow AND holding is flag AND head_shape=body_shape then YES else NO
+- If jacket_color is Yellow AND holding is balloon AND body_shape=head_shape then YES else NO
+- If jacket_color is Yellow AND holding is sword AND head_shape is square AND body_shape is square then YES else NO
+- If jacket_color is Yellow AND holding is sword AND head_shape is round AND body_shape is round then YES else NO
+- If jacket_color is Yellow AND holding is sword AND head_shape is octagon the NO
+
+b) The rules for the dataset for the monks1.csv is that if the jacket_color is red then it is a monk. Otherwise if head_shape is equal to body shape, then it is also a monk.
+
+From the rules above there are certain redundant attributes in the decision tree. Holding, and Has Tie are included in the decision tree when these attributes are not even relevant for determining a monk. This unnecessarily increases the height and complexity of the decision tree. Any branch chosen for these redundant attributes will lead to the same result so it is redundant.For example, if predict a certain instance, and we're at the path jacket_color=blue,holding=balloon, then having no_tie, or having a tie will lead to the same result no matter what the head_shape or body_shape was.
+
+The tree, however, seems to learn the rule of the dataset with some redundancies. If we have jacket_color=red, the tree goes to yes indicating that instance is a monk. For all the other paths it also learns that if body_shape is equal to head_shape then the instance must be a monk. However, as stated before these paths have redundant attribute(s) that don't matter.
+
+There is a case where if jacket_color=yellow, holding=sword, and head_shape=octagon, then the tree learns a NO. However, this isn't correct, as the tree hasn't looked at if the body_shape is equal to the head_shape to determine that it is not a monk. This is the only place that leads to the incorrect prediction in the tree for an instance.
+
+3.
+a) 
+0.5886 accuracy
+
+b) 
+0.5886 +- (1.96 * sqrt(0.5886(1-0.5886)/1405)
+[0.5629, 0.6143] Confidence Interval
+
+c)
+When comparing the results from q1b and q3b, we observe that the accuracy is much higher when using numerical attributes. This implies that handling numerical attributes by finding the best threshold and gain creates a tree that leads to the most accurate predictions. 
+
+4. 
+a) seeds = [329, 182, 94, 1, 23, 90, 823, 781, 4938]
+
+0.5730 average for Categorical
+0.8994 average for Numerical
+
+b) Yes, we observed the same relationship when averaged over 10 seeds. The average for numerical accuracy was much higher with an average of 0.8994 accuracy over 10 different seeds while the accuracy for categorical accuracy was only 0.573, which is only a little over half predictions correct.
+
+c) Yes, the averages for both categorical (0.5730) and numerical (0.8994) both fell within the confidence intervals from q1b and q3b.
+
+Additional Readme Questions
+
+3) We enjoyed implementing the ID3 algorithm, however, we faced a lot of tricky bugs which were hard to fix.  We were mostly confused about when to remove attributes from the attributes list, and how to remove it. It was a good review of how shallow and deep copy worked
+
+4) 8-10 hrs
+
+5) We have adhered to the Honor Code in this assignment
