@@ -13,12 +13,13 @@ import csv
 import copy
 import time
 
-start=time.time()
+
+
 pd.options.mode.chained_assignment = None 
 
 #handling command line arguments to be entered in the terminal
 training_percentage=float(sys.argv[2])
-random_seed= int(sys.argv[3])
+random_seed=int(sys.argv[3])
 is_numeric=str(sys.argv[4])
 dataset=sys.argv[1]
 
@@ -189,7 +190,7 @@ def best_attribute_numeric(attributes, S):
         attribute_threshold[attribute]=threshold_best
     
     best_attribute=max(best_dict,key=best_dict.get)
-       
+    
     return best_attribute,attribute_threshold[best_attribute]
 
 def possible_values(attribute, subset, index):
@@ -265,9 +266,7 @@ def ID3(attributes, subset):
 
 #function to predict labels and calculate accuracy for test set for is_numeric=false
 def prediction(test_df,tree,columnnames,place_dict,twolist):
-    accuracy=0
     numerator=0
-    length_testdf=len(test_df)
     for row in test_df.values:
         attribute_value={}
         for x in range(len(columnnames)):
@@ -278,8 +277,6 @@ def prediction(test_df,tree,columnnames,place_dict,twolist):
         column = place_dict[predicted_label]
         row = place_dict[row[0]]
         twolist[row][column]+=1
-    accuracy=numerator/length_testdf
-    print("The accuracy is",accuracy)
 
 ##function to traverse the tree predicting label for is_numeric=false
 def predict_label(attribute_value,tree):
@@ -290,9 +287,7 @@ def predict_label(attribute_value,tree):
 
 #function to predict labels and calculate accuracy for test set for is_numeric=true
 def numeric_prediction(test_df,tree,columnnames, place_dict, twolist):
-    accuracy=0
     numerator=0
-    length_testdf=len(test_df)
     for row in test_df.values:
         attribute_value={}
         for x in range(len(columnnames)):
@@ -303,8 +298,6 @@ def numeric_prediction(test_df,tree,columnnames, place_dict, twolist):
         column = place_dict[predicted_label]
         row = place_dict[row[0]]
         twolist[row][column]+=1
-    accuracy=numerator/length_testdf
-    print("The accuracy is",accuracy)
 
 #function to traverse the tree predicting label for is_numeric=true
 def numeric_predict_label(attribute_value,tree):
@@ -370,13 +363,9 @@ def main():
         for row in twolist:
             row.append(all_unique[count])
             write.writerow(row)
-            count+=1       
-
-
+            count+=1     
+          
 main()
-
-end=time.time()
-print(end-start)
 
 
 
