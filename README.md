@@ -1,5 +1,12 @@
 Austin Alcancia and Harsha Rauniyar
 
+tree.py contains code of the decision-tree coded from scratch using ID3 algorithm.
+Run program as follows from the command line:
+python3 tree.py <csv_filename> <training_set_percentage> <random_seed> <Either True or False indicating whether we should handle numeric attributes as
+numeric (if False, then we treat them as categorical values)>
+For example,
+python3 tree.py opticalDigit.csv 0.75 12345 True
+
 Research Questions
 
 Please use your program to answer these questions and record your answers in a README file:
