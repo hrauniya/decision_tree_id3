@@ -1,5 +1,42 @@
 Austin Alcancia and Harsha Rauniyar
 
+Research Questions
+
+Please use your program to answer these questions and record your answers in a README file:
+
+1) Pick a single random seed and a single training set percentage (document both in your
+README) and run your program on each of the four data sets. You should pass in True
+as the final parameter to your program to treat all numeric attributes as numeric.
+a. What is the accuracy you observed on each data set?
+b. Calculate a 95% confidence interval for the accuracy on each data set.
+
+2) Create an image of the tree that your program learned in Question 1 for the monks1.csv
+data set (you can draw by hand and scan your image into a PDF, or you can use a
+drawing program to create an image file). Make sure to upload your image to GitHub.
+a. What are the rules learned by the algorithm?
+b. How do these rules compare to the true rules in the data set (described on page 1
+of the assignment)?
+
+3) Using the same seed and training set percentage from Q1, rerun your program on the
+opticalDigit.csv data set and pass in False for the final parameter so that your algorithm
+treats each attribute as categorical values (instead of numeric):
+a. What is the accuracy you observed?
+b. Calculate a 95% confidence interval around that accuracy
+c. Compare the confidence intervals from your answer to Q1b and Q3b. What do
+you observe? What does this imply?
+
+4) Choose 9 new seeds (document in your README). Rerun your program on
+opticalDigit.csv using these 9 new seeds using both True and False as the final parameter
+to the program.
+a. Calculate the average accuracy across the 10 seeds when you treated the attributes
+as (1) numeric and (2) categorical
+b. Did you observe the same trends as in Q3c? That is, if one approach achieved a
+statistically significantly higher accuracy in Q3c, did the same approach achieve a
+higher accuracy when averaged over 10 seeds? If they were not statistically
+significantly different in Q3c, are the averages very close?
+c. Did these averages fall in your confidence intervals calculated in Q1b and Q3b?
+
+
 Answer to research questions
 
 1)
